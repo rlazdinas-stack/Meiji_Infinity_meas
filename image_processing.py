@@ -5,8 +5,6 @@ Implements edge detection, contour approximation, and line width measurement.
 
 import cv2
 import numpy as np
-from scipy import ndimage
-from scipy.interpolate import UnivariateSpline
 
 
 class ImageProcessor:

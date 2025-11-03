@@ -35,6 +35,9 @@ class MeijiMeasurementApp:
         self.processed_frame = None
         self.update_thread = None
         
+        # Thread lock for frame access
+        self.frame_lock = threading.Lock()
+        
         # Create GUI
         self._create_widgets()
         
@@ -177,7 +180,8 @@ class MeijiMeasurementApp:
         while self.is_running:
             frame = self.camera.grab_frame()
             if frame is not None:
-                self.current_frame = frame
+                with self.frame_lock:
+                    self.current_frame = frame
                 # Update display in main thread
                 self.root.after(0, self._display_live_frame, frame)
             time.sleep(0.033)  # ~30 fps
@@ -216,15 +220,15 @@ class MeijiMeasurementApp:
     
     def _measure(self):
         """Capture image and perform measurement."""
-        if self.current_frame is None:
-            messagebox.showwarning("Warning", "No frame available for measurement")
-            return
+        # Safely copy current frame
+        with self.frame_lock:
+            if self.current_frame is None:
+                messagebox.showwarning("Warning", "No frame available for measurement")
+                return
+            self.captured_frame = self.current_frame.copy()
         
         self.status_var.set("Status: Processing measurement...")
         self.results_text.delete(1.0, tk.END)
-        
-        # Capture current frame
-        self.captured_frame = self.current_frame.copy()
         
         # Process in separate thread to avoid blocking GUI
         threading.Thread(target=self._process_measurement, daemon=True).start()

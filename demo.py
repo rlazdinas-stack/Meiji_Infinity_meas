@@ -6,7 +6,6 @@ Demonstrates the measurement workflow without requiring a display.
 
 import cv2
 import numpy as np
-from camera_interface import LumeneraCamera
 from image_processing import ImageProcessor
 
 

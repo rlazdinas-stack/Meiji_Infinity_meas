@@ -6,8 +6,6 @@ the Infinity 1 camera.
 
 import ctypes
 import numpy as np
-from ctypes import c_void_p, c_int, c_uint, c_char_p, POINTER, byref
-import os
 import sys
 
 
@@ -71,10 +69,10 @@ class LumeneraCamera:
         """
         if not self.sdk_loaded:
             print("SDK not loaded, using simulation mode")
-            # Simulate camera opening
+            # Simulate camera opening with Infinity 1 resolution
             self.camera_handle = 1
-            self.width = 1280
-            self.height = 1024
+            self.width = 2048
+            self.height = 1536
             return True
         
         try:
@@ -82,8 +80,8 @@ class LumeneraCamera:
             # Actual implementation depends on SDK API
             # This is a placeholder for the real SDK call
             self.camera_handle = camera_index
-            self.width = 1280
-            self.height = 1024
+            self.width = 2048
+            self.height = 1536
             return True
         except Exception as e:
             print(f"Error opening camera: {e}")

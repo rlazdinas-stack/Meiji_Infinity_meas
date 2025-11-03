@@ -169,31 +169,18 @@ class MeijiApp:
     
     def start_live_view(self):
         """Start the live view"""
-        if self.camera.start_capture():
-            self.live_view_active = True
-            self.live_view_btn.config(text="Stop Live View")
-            self.measure_btn.config(state=tk.NORMAL)
-            self.status_label.config(text="Status: Live View Active")
-            
-            # Remove placeholder
-            self.canvas.delete("placeholder")
-            
-            # Start update thread
-            self.update_thread = threading.Thread(target=self.update_live_view, daemon=True)
-            self.update_thread.start()
-        else:
-            self.camera.start_capture()
-            self.live_view_active = True
-            self.live_view_btn.config(text="Stop Live View")
-            self.measure_btn.config(state=tk.NORMAL)
-            self.status_label.config(text="Status: Live View Active")
-            
-            # Remove placeholder
-            self.canvas.delete("placeholder")
-            
-            # Start update thread
-            self.update_thread = threading.Thread(target=self.update_live_view, daemon=True)
-            self.update_thread.start()
+        self.camera.start_capture()
+        self.live_view_active = True
+        self.live_view_btn.config(text="Stop Live View")
+        self.measure_btn.config(state=tk.NORMAL)
+        self.status_label.config(text="Status: Live View Active")
+        
+        # Remove placeholder
+        self.canvas.delete("placeholder")
+        
+        # Start update thread
+        self.update_thread = threading.Thread(target=self.update_live_view, daemon=True)
+        self.update_thread.start()
     
     def stop_live_view(self):
         """Stop the live view"""

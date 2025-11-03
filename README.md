@@ -1,16 +1,29 @@
 # Meiji Infinity Measurement Application
 
-A Python application for measuring line widths using the Lumenera Infinity 1 camera with the Meiji microscope. The application provides live camera view, edge detection, contour approximation, and subpixel-accurate line width measurements.
+A Python application for measuring line widths using the Lumenera INFINITY1-3C camera with the Meiji microscope. The application provides live camera view, edge detection, contour approximation, and subpixel-accurate line width measurements.
+
+## Camera Specifications
+
+- **Model**: INFINITY1-3C (color)
+- **Model ID**: 0xA3
+- **Serial Number**: 202711
+- **Interface**: USB 2.0
+- **Resolution**: 2048x1536
+- **API Version**: 2.1.1.126
+- **Driver Version**: 5.2.4.251
+- **Firmware Version**: 28.68
+- **FPGA Version**: 14.62
 
 ## Features
 
-- **Live Camera View**: Real-time video streaming from Lumenera Infinity 1 camera
+- **Live Camera View**: Real-time video streaming from INFINITY1-3C camera via USB 2.0
 - **Image Capture**: Capture frames for measurement with the "Meas" button
 - **Edge Detection**: Advanced Canny edge detection with adjustable thresholds
 - **Contour Approximation**: Approximate detected edges with straight lines using Douglas-Peucker algorithm
 - **Subpixel Refinement**: Refine edge positions to subpixel accuracy for each image row
 - **Line Width Measurement**: Calculate precise line width measurements with statistics
 - **Visual Results**: Display measurements overlaid on captured images
+- **Camera Information**: Display complete camera specifications and firmware versions
 
 ## Requirements
 
@@ -18,8 +31,8 @@ A Python application for measuring line widths using the Lumenera Infinity 1 cam
 - OpenCV
 - NumPy
 - Pillow
-- SciPy
-- Lumenera Infinity SDK (optional - runs in simulation mode without SDK)
+- Lumenera Lucam API/SDK (optional - runs in simulation mode without SDK)
+- USB 2.0 port for camera connection
 
 ## Installation
 
@@ -34,9 +47,10 @@ cd Meiji_Infinity_meas
 pip install -r requirements.txt
 ```
 
-3. (Optional) Install Lumenera Infinity SDK:
-   - Download and install the Lumenera Infinity SDK from the manufacturer
-   - Ensure the SDK libraries are in your system path
+3. (Optional) Install Lumenera Lucam API/SDK:
+   - Download and install the Lumenera Lucam API from the manufacturer
+   - Ensure the SDK libraries (LucamAPI.dll on Windows or liblucamapi.so on Linux) are in your system path
+   - Connect the INFINITY1-3C camera to a USB 2.0 port
    - Without the SDK, the application runs in simulation mode with test patterns
 
 ## Usage
@@ -97,8 +111,9 @@ Line widths are calculated from refined edge positions:
 ```
 Meiji_Infinity_meas/
 ├── main.py                 # Main application with GUI
-├── camera_interface.py     # Lumenera camera SDK wrapper
+├── camera_interface.py     # INFINITY1-3C camera Lucam API wrapper
 ├── image_processing.py     # Image processing and measurement algorithms
+├── demo.py                 # Command-line demo for testing
 ├── requirements.txt        # Python dependencies
 ├── .gitignore             # Git ignore rules
 └── README.md              # This file
@@ -107,9 +122,18 @@ Meiji_Infinity_meas/
 ## Troubleshooting
 
 ### Camera Not Detected
-- Verify Lumenera SDK is installed correctly
-- Check camera USB connection
+- Verify Lumenera Lucam API is installed correctly
+- Check that INFINITY1-3C camera is connected to a USB 2.0 port
+- Verify camera power LED is on
+- Check USB cable connection
+- Try a different USB 2.0 port
 - The application will run in simulation mode if camera is not available
+
+### USB Connection Issues
+- Ensure the camera is connected to a USB 2.0 port (not USB 3.0 only)
+- Check Device Manager (Windows) or lsusb (Linux) for camera recognition
+- Reinstall Lumenera drivers if necessary
+- Verify the camera serial number matches: 202711
 
 ### No Lines Detected
 - Adjust Canny threshold values

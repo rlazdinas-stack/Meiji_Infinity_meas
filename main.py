@@ -144,7 +144,26 @@ class MeijiMeasurementApp:
     def _initialize_camera(self):
         """Initialize the camera."""
         if self.camera.open():
-            self.status_var.set("Status: Camera connected")
+            cam_info = self.camera.get_camera_info()
+            status_msg = f"Status: {cam_info.get('model', 'Camera')} connected"
+            if 'serial' in cam_info:
+                status_msg += f" (S/N: {cam_info['serial']})"
+            self.status_var.set(status_msg)
+            
+            # Display camera info in results area
+            self.results_text.delete(1.0, tk.END)
+            self.results_text.insert(tk.END, "=== Camera Information ===\n\n")
+            self.results_text.insert(tk.END, f"Model: {cam_info.get('model', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Model ID: 0x{cam_info.get('model_id', 0):X}\n")
+            self.results_text.insert(tk.END, f"Serial Number: {cam_info.get('serial', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Interface: {cam_info.get('interface', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Resolution: {cam_info.get('width', 0)}x{cam_info.get('height', 0)}\n")
+            self.results_text.insert(tk.END, f"API Version: {cam_info.get('api_version', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Driver Version: {cam_info.get('driver_version', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Firmware Version: {cam_info.get('firmware_version', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"FPGA Version: {cam_info.get('fpga_version', 'Unknown')}\n")
+            self.results_text.insert(tk.END, f"Hardware Revision: {cam_info.get('hardware_revision', 0)}\n")
+            self.results_text.insert(tk.END, "\nReady for measurement. Click 'Start Live View' to begin.\n")
         else:
             self.status_var.set("Status: Camera connection failed")
             messagebox.showwarning("Camera", "Could not connect to camera. Running in simulation mode.")

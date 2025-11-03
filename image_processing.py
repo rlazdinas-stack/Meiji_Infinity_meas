@@ -193,86 +193,84 @@ class ImageProcessor:
         if edge_positions is None or len(edge_positions) == 0:
             return []
         
-        # Group edges into line pairs
-        # Find all unique vertical line regions
-        all_edges = []
-        for row, positions in edge_positions.items():
-            for pos in positions:
-                all_edges.append((row, pos))
+        measurements = []
         
-        if len(all_edges) == 0:
+        # For each row, pair up edges that are close together
+        # Collect all edge pairs across all rows
+        all_pairs = []
+        
+        for row, positions in edge_positions.items():
+            if len(positions) < 2:
+                continue
+            
+            # Pair consecutive edges (assuming they form line boundaries)
+            for i in range(0, len(positions) - 1, 2):
+                if i + 1 < len(positions):
+                    left_pos = positions[i]
+                    right_pos = positions[i + 1]
+                    width = right_pos - left_pos
+                    
+                    # Only consider reasonable widths (filter out noise)
+                    if width > 5 and width < 500:
+                        center = (left_pos + right_pos) / 2
+                        all_pairs.append({
+                            'row': row,
+                            'left': left_pos,
+                            'right': right_pos,
+                            'width': width,
+                            'center': center
+                        })
+        
+        if len(all_pairs) == 0:
+            self.measurements = []
             return []
         
-        # Sort by column position
-        all_edges.sort(key=lambda x: x[1])
+        # Group pairs that belong to the same line (similar center position)
+        # Sort by center position
+        all_pairs.sort(key=lambda x: x['center'])
         
-        # Group edges that are close together horizontally
         line_groups = []
-        current_group = [all_edges[0]]
+        current_group = [all_pairs[0]]
         
-        for i in range(1, len(all_edges)):
-            row, col = all_edges[i]
-            prev_row, prev_col = all_edges[i-1]
+        for i in range(1, len(all_pairs)):
+            pair = all_pairs[i]
+            prev_pair = all_pairs[i - 1]
             
-            # If the column is close to previous (within 100 pixels) and rows are adjacent
-            if abs(col - prev_col) < 100 and abs(row - prev_row) < 50:
-                current_group.append((row, col))
+            # If centers are close (within 50 pixels), they're likely the same line
+            if abs(pair['center'] - prev_pair['center']) < 50:
+                current_group.append(pair)
             else:
                 if len(current_group) > 0:
                     line_groups.append(current_group)
-                current_group = [(row, col)]
+                current_group = [pair]
         
         if len(current_group) > 0:
             line_groups.append(current_group)
         
-        # Calculate measurements for each line region
-        measurements = []
-        
-        # Process line pairs
-        # Assuming edges come in pairs, we look for consecutive groups
-        for i in range(0, len(line_groups) - 1, 2):
-            if i + 1 >= len(line_groups):
-                break
+        # Calculate statistics for each line group
+        for group in line_groups:
+            if len(group) < 3:  # Require at least 3 samples for a valid measurement
+                continue
             
-            left_edge = line_groups[i]
-            right_edge = line_groups[i + 1]
+            widths = [p['width'] for p in group]
+            rows = [p['row'] for p in group]
+            centers = [p['center'] for p in group]
+            left_edges = [p['left'] for p in group]
+            right_edges = [p['right'] for p in group]
             
-            # Calculate average positions
-            left_positions = [pos for row, pos in left_edge]
-            right_positions = [pos for row, pos in right_edge]
-            
-            if len(left_positions) > 0 and len(right_positions) > 0:
-                # Calculate width for each row that has both edges
-                widths = []
-                rows_measured = []
-                
-                # Create dictionaries for easy lookup
-                left_dict = {row: pos for row, pos in left_edge}
-                right_dict = {row: pos for row, pos in right_edge}
-                
-                # Find common rows
-                common_rows = set(left_dict.keys()) & set(right_dict.keys())
-                
-                for row in sorted(common_rows):
-                    width = right_dict[row] - left_dict[row]
-                    if width > 0:  # Valid width
-                        widths.append(width)
-                        rows_measured.append(row)
-                
-                if len(widths) > 0:
-                    measurement = {
-                        'mean_width': np.mean(widths),
-                        'std_width': np.std(widths),
-                        'min_width': np.min(widths),
-                        'max_width': np.max(widths),
-                        'num_samples': len(widths),
-                        'center_x': np.mean(left_positions + right_positions),
-                        'center_y': np.mean(rows_measured),
-                        'rows': rows_measured,
-                        'left_edge': left_positions,
-                        'right_edge': right_positions
-                    }
-                    measurements.append(measurement)
+            measurement = {
+                'mean_width': np.mean(widths),
+                'std_width': np.std(widths),
+                'min_width': np.min(widths),
+                'max_width': np.max(widths),
+                'num_samples': len(widths),
+                'center_x': np.mean(centers),
+                'center_y': np.mean(rows),
+                'rows': rows,
+                'left_edge': left_edges,
+                'right_edge': right_edges
+            }
+            measurements.append(measurement)
         
         self.measurements = measurements
         return measurements

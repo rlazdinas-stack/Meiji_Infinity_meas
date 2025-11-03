@@ -36,7 +36,10 @@ Thumbs.db
 
 # Project specific
 captured_images/
+demo_result.png
 *.bmp
 *.png
 *.jpg
 *.jpeg
+!screenshot.png
+!docs/*.png
